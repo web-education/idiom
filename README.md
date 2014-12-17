@@ -2,7 +2,7 @@ idiom
 =====
 
 Idiom is a new translation system for AngularJS that allows you to read in the current scope to provide 
-context-based translations - no more s/he peppering your text, you actually know your user's gender.
+context-based translations - no more thing(s), s/he, his/her, you actually know what you're writing about.
 
 #Translation files
 
