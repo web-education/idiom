@@ -4,7 +4,7 @@ idiom
 Idiom is a new translation system for AngularJS that allows you to read in the current scope to provide 
 context-based translations - no more thing(s), s/he, his/her, you actually know what you're writing about.
 
-#Translation files
+#Usage
 
 Add a folder to your project containing one json file per language (en.json, fr.json, de.json...). In the file,
 a simple key-value system allows you to write your translations :
