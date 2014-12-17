@@ -38,7 +38,7 @@ Your translations can directly use your current scope:
 <pre>
 {
     "welcome": "Welcome, {{user.name}}!",
-    "description": "<span ng-if="user.male">He</span><span ng-if="user.female">She</span>'s awesome!"
+    "description": "&lt;span ng-if="user.male"&gt;He&lt;/span&gt;&lt;span ng-if="user.female"&gt;She&lt;/span&gt;'s awesome!"
 }
 </pre>
 
