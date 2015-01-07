@@ -113,7 +113,36 @@ window.idiom = (function(){
 			};
 			request.send();
 		},
+		watchers: [],
+		watch: function(callback){
+			this.watchers.push(callback);
+		},
+		updateWatchers: function(){
+			this.watchers.forEach(function(watcher){
+				if(typeof watcher === 'function'){
+					watcher();
+				}
+			})
+		},
+		setLanguage: function(language){
+			bundle = {};
+			var that = this;
+			this.currentLanguage = language;
+			var n = this.folders.length;
+			this.folders.forEach(function(folder){
+				that.addTranslations(folder, function(){
+					n--;
+					if(n === 0){
+						that.updateWatchers()
+					}
+				})
+			})
+		},
+		folders: [],
 		addTranslations: function(folder, callback){
+			if(this.folders.indexOf(folder) === -1){
+				this.folders.push(folder);
+			}
 			if(!this.currentLanguage){
 				this.currentLanguage = window.currentLanguage || window.navigator.language;
 			}
@@ -143,41 +172,42 @@ window.idiom = (function(){
 							}
 						}
 
-						attributes.$observe('content', function(val) {
+						var updateContent = function(){
 							if(!attributes.content){
 								return;
 							}
-							element.html($compile('<span class="no-style">' + lang.translate(attributes.content) + '</span>')(scope));
-						});
-
-						attributes.$observe('attr', function(val) {
+							element.html($compile('<span class="no-style">' + idiom.translate(attributes.content) + '</span>')(scope));
+						};
+						var updateAttr = function(){
 							if(!attributes.attr){
 								return;
 							}
-							var compiled = $compile('<span>' + lang.translate(attributes[attributes.attr]) + '</span>')(scope);
+							var compiled = $compile('<span>' + idiom.translate(attributes[attributes.attr]) + '</span>')(scope);
 							setTimeout(function(){
 								element.attr(attributes.attr, compiled.text());
 							}, 10);
-						});
+						};
 
-						attributes.$observe('attributes', function(val){
+						var updateAttributes = function(){
 							if(!attributes.attributes){
 								return;
 							}
 							var attrObj = scope.$eval(attributes.attributes);
 							for(var prop in attrObj){
-								var compiled = $compile('<span>' + lang.translate(attrObj[prop]) + '</span>')(scope);
+								var compiled = $compile('<span>' + idiom.translate(attrObj[prop]) + '</span>')(scope);
 								setTimeout(function(){
 									element.attr(prop, compiled.text());
 								}, 0);
 							}
-						})
+						};
+						attributes.$observe('content', updateContent);
+						attributes.$observe('attr', updateAttr);
+						attributes.$observe('attributes', updateAttributes);
 
-						attributes.$observe('key', function(val) {
-							if(!attributes.key){
-								return;
-							}
-							element.html($compile('<span class="no-style">' + lang.translate(attributes.key) + '</span>')(scope));
+						idiom.watch(function(){
+							updateAttr();
+							updateAttributes();
+							updateContent();
 						});
 					}
 				};
@@ -187,7 +217,11 @@ window.idiom = (function(){
 				return {
 					restrict: 'E',
 					link: function(scope, element, attributes){
-						element.html($compile('<span class="no-style">' + lang.translate(element.text()) + '</span>')(scope));
+						var updateContent = function(){
+							element.html($compile('<span class="no-style">' + idiom.translate(element.text()) + '</span>')(scope));
+						};
+						idiom.watch(updateContent);
+						updateContent();
 					}
 				}
 			});
@@ -195,12 +229,15 @@ window.idiom = (function(){
 			module.directive('i18nPlaceholder', function($compile){
 				return {
 					link: function(scope, element, attributes){
-						attributes.$observe('i18nPlaceholder', function(val) {
-							var compiled = $compile('<span>' + lang.translate(attributes.i18nPlaceholder) + '</span>')(scope);
+						var updateContent = function(){
+							var compiled = $compile('<span>' + idiom.translate(attributes.i18nPlaceholder) + '</span>')(scope);
 							setTimeout(function(){
 								element.attr('placeholder', compiled.text());
 							}, 10);
-						});
+						};
+						attributes.$observe('i18nPlaceholder', updateContent);
+						idiom.watch(updateContent);
+
 					}
 				}
 			});
@@ -208,12 +245,14 @@ window.idiom = (function(){
 			module.directive('i18nValue', function($compile){
 				return {
 					link: function(scope, element, attributes){
-						attributes.$observe('i18nValue', function(val) {
-							var compiled = $compile('<span>' + lang.translate(attributes.i18nValue) + '</span>')(scope);
+						var updateContent = function(){
+							var compiled = $compile('<span>' + idiom.translate(attributes.i18nValue) + '</span>')(scope);
 							setTimeout(function(){
 								element.attr('value', compiled.text());
 							}, 10);
-						});
+						};
+						attributes.$observe('i18nValue', updateContent);
+						idiom.watch(updateContent);
 					}
 				}
 			});
